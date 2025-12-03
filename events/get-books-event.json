@@ -1,0 +1,11 @@
+{
+  "httpMethod": "GET",
+  "path": "/books",
+  "queryStringParameters": null,
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
