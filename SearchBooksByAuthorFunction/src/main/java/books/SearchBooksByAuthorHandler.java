@@ -19,14 +19,14 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Slf4j
-public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class SearchBooksByAuthorHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbTable<Book> bookTable;
     private final ObjectMapper objectMapper;
     private final String tableName;
 
-    public GetAllBooksHandler() {
+    public SearchBooksByAuthorHandler() {
         this.tableName = System.getenv("TABLE_NAME");
         DynamoDbClient ddbClient = DynamoDbClient.builder().build();
         this.enhancedClient = DynamoDbEnhancedClient.builder()
@@ -38,22 +38,34 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
-        log.info("GetAllBooks function started - Request ID: {}", context.getAwsRequestId());
+        log.info("SearchBooksByAuthor function started - Request ID: {}", context != null ? context.getAwsRequestId() : "test");
         
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Access-Control-Allow-Origin", "*");
 
         try {
-            log.info("Scanning DynamoDB table: {}", tableName);
+            String authorQuery = input.getQueryStringParameters() != null ? 
+                input.getQueryStringParameters().get("author") : null;
+                
+            if (authorQuery == null || authorQuery.trim().isEmpty()) {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400)
+                        .withHeaders(headers)
+                        .withBody("{\"error\": \"Author parameter is required\"}");
+            }
+            
+            log.info("Searching books by author: {}", authorQuery);
             
             List<BookResponse> books = bookTable.scan()
                     .items()
                     .stream()
+                    .filter(book -> book.getAuthor() != null && 
+                           book.getAuthor().toLowerCase().contains(authorQuery.toLowerCase()))
                     .map(this::convertToBookResponse)
                     .collect(Collectors.toList());
             
-            log.info("Found {} books in database", books.size());
+            log.info("Found {} books by author: {}", books.size(), authorQuery);
             
             String jsonResponse = objectMapper.writeValueAsString(books);
             
@@ -63,9 +75,9 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
                     .withBody(jsonResponse);
                     
         } catch (Exception e) {
-            log.error("Error retrieving books from DynamoDB", e);
+            log.error("Error searching books by author", e);
             
-            String errorResponse = "{\"error\": \"Failed to retrieve books\", \"message\": \"" + e.getMessage() + "\"}";
+            String errorResponse = "{\"error\": \"Failed to search books\", \"message\": \"" + e.getMessage() + "\"}";
             
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)

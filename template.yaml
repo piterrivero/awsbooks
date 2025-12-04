@@ -103,6 +103,116 @@ Resources:
             Auth:
               Authorizer: BooksAuthorizer
 
+  CreateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: CreateBookFunction
+      Handler: books.CreateBookHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        CreateBook:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books
+            Method: post
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  GetBookByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetBookByIdFunction
+      Handler: books.GetBookByIdHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        GetBookById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/{id}
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  GetBooksCountFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetBooksCountFunction
+      Handler: books.GetBooksCountHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        GetBooksCount:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/count
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  SearchBooksByTitleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SearchBooksByTitleFunction
+      Handler: books.SearchBooksByTitleHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        SearchBooksByTitle:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/title
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  SearchBooksByAuthorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SearchBooksByAuthorFunction
+      Handler: books.SearchBooksByAuthorHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        SearchBooksByAuthor:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/author
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
   # API Gateway for protected endpoints
   BooksApi:
     Type: AWS::Serverless::Api
