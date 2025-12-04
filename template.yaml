@@ -12,6 +12,66 @@ Globals:
     MemorySize: 512
 
 Resources:
+  # Cognito User Pool
+  BooksUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: BooksUserPool
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+
+  # Cognito User Pool Client
+  BooksUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref BooksUserPool
+      ClientName: BooksWebClient
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ADMIN_NO_SRP_AUTH
+        - USER_PASSWORD_AUTH
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LoginFunction
+      Handler: auth.LoginHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref BooksUserPool
+          USER_POOL_CLIENT_ID: !Ref BooksUserPoolClient
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminInitiateAuth
+              Resource: !GetAtt BooksUserPool.Arn
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: post
+
   GetAllBooksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -28,16 +88,39 @@ Resources:
         GetAllBooks:
           Type: Api
           Properties:
+            RestApiId: !Ref BooksApi
             Path: /books
             Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  # API Gateway for protected endpoints
+  BooksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: BooksAuthorizer
+        Authorizers:
+          BooksAuthorizer:
+            UserPoolArn: !GetAtt BooksUserPool.Arn
 
 Outputs:
   BooksApi:
     Description: "API Gateway endpoint URL for Prod stage for Books API"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/books/"
+    Value: !Sub "https://${BooksApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/books/"
   GetAllBooksFunction:
     Description: "Get All Books Lambda Function ARN"
     Value: !GetAtt GetAllBooksFunction.Arn
   GetAllBooksFunctionIamRole:
     Description: "Implicit IAM Role created for Get All Books function"
     Value: !GetAtt GetAllBooksFunctionRole.Arn
+  UserPoolId:
+    Description: "Cognito User Pool ID"
+    Value: !Ref BooksUserPool
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID"
+    Value: !Ref BooksUserPoolClient
+  UserPoolArn:
+    Description: "Cognito User Pool ARN"
+    Value: !GetAtt BooksUserPool.Arn

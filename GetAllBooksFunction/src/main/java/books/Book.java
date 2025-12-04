@@ -11,15 +11,18 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 @AllArgsConstructor
 @DynamoDbBean
 public class Book {
-    private String id;
+    private Integer id;
     private String title;
     private String author;
-    private String genre;
-    private Integer year;
-    private Boolean read;
+    private String finishDate;
+    private Integer readingTimeInDays;
+    private Integer readYear;
+    private Integer publicationYear;
+    private String format;
+    private String language;
 
     @DynamoDbPartitionKey
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 }
