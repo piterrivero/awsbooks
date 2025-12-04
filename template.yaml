@@ -5,11 +5,20 @@ Description: >
 
   Sample SAM Template for awsbooks
 
+Parameters:
+  TableNameParameter:
+    Type: String
+    Default: booksdev
+    Description: DynamoDB table name for books
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 20
     MemorySize: 512
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref TableNameParameter
 
 Resources:
   # Cognito User Pool
@@ -83,7 +92,7 @@ Resources:
       MemorySize: 512
       Policies:
         - DynamoDBReadPolicy:
-            TableName: booksdev
+            TableName: !Ref TableNameParameter
       Events:
         GetAllBooks:
           Type: Api

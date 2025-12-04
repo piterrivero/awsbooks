@@ -23,13 +23,15 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
     private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbTable<Book> bookTable;
     private final ObjectMapper objectMapper;
+    private final String tableName;
 
     public GetAllBooksHandler() {
+        this.tableName = System.getenv("TABLE_NAME");
         DynamoDbClient ddbClient = DynamoDbClient.builder().build();
         this.enhancedClient = DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(ddbClient)
                 .build();
-        this.bookTable = enhancedClient.table("booksdev", TableSchema.fromBean(Book.class));
+        this.bookTable = enhancedClient.table(tableName, TableSchema.fromBean(Book.class));
         this.objectMapper = new ObjectMapper();
     }
 
@@ -42,7 +44,7 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
         headers.put("Access-Control-Allow-Origin", "*");
 
         try {
-            log.info("Scanning DynamoDB table: booksdev");
+            log.info("Scanning DynamoDB table: {}", tableName);
             
             List<Book> books = bookTable.scan()
                     .items()
