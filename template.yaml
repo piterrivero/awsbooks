@@ -113,7 +113,7 @@ Resources:
         - x86_64
       MemorySize: 512
       Policies:
-        - DynamoDBWritePolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref TableNameParameter
       Events:
         CreateBook:

@@ -34,6 +34,8 @@ public class SearchBooksByTitleHandler implements RequestHandler<APIGatewayProxy
                 .build();
         this.bookTable = enhancedClient.table(tableName, TableSchema.fromBean(Book.class));
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules();
+        this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Override
@@ -63,6 +65,7 @@ public class SearchBooksByTitleHandler implements RequestHandler<APIGatewayProxy
                     .filter(book -> book.getTitle() != null && 
                            book.getTitle().toLowerCase().contains(titleQuery.toLowerCase()))
                     .map(this::convertToBookResponse)
+                    .sorted((b1, b2) -> b1.getTitle().compareToIgnoreCase(b2.getTitle()))
                     .collect(Collectors.toList());
             
             log.info("Found {} books matching title: {}", books.size(), titleQuery);

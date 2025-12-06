@@ -34,6 +34,8 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
                 .build();
         this.bookTable = enhancedClient.table(tableName, TableSchema.fromBean(Book.class));
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules();
+        this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Override
@@ -51,6 +53,7 @@ public class GetAllBooksHandler implements RequestHandler<APIGatewayProxyRequest
                     .items()
                     .stream()
                     .map(this::convertToBookResponse)
+                    .sorted((b1, b2) -> Integer.compare(b1.getId(), b2.getId()))
                     .collect(Collectors.toList());
             
             log.info("Found {} books in database", books.size());

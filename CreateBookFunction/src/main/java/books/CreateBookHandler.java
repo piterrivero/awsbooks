@@ -38,6 +38,8 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
                 .build();
         this.bookTable = enhancedClient.table(tableName, TableSchema.fromBean(Book.class));
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.findAndRegisterModules();
+        this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Override
