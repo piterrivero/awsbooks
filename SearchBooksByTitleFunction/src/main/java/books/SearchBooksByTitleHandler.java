@@ -97,7 +97,7 @@ public class SearchBooksByTitleHandler implements RequestHandler<APIGatewayProxy
         response.setPublicationYear(book.getPublicationYear());
         response.setLanguage(book.getLanguage());
         response.setFormat(book.getFormat());
-        response.setFinishDate(LocalDate.parse(book.getFinishDate()));
+        response.setFinishDate(book.getFinishDate() != null ? LocalDate.parse(book.getFinishDate()) : null);
         response.setReadYear(book.getReadYear());
         response.setReadingTimeInDays(book.getReadingTimeInDays());
         return response;

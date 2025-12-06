@@ -8,7 +8,7 @@ Description: >
 Parameters:
   TableNameParameter:
     Type: String
-    Default: booksdev
+    Default: books
     Description: DynamoDB table name for books
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
@@ -209,6 +209,50 @@ Resources:
           Properties:
             RestApiId: !Ref BooksApi
             Path: /books/search/author
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  GetBooksCountByYearFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetBooksCountByYearFunction
+      Handler: books.GetBooksCountByYearHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        GetBooksCountByYear:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/count/year
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+
+  SearchBooksByReadYearFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SearchBooksByReadYearFunction
+      Handler: books.SearchBooksByReadYearHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        SearchBooksByReadYear:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/year
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
