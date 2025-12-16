@@ -8,8 +8,16 @@ Description: >
 Parameters:
   TableNameParameter:
     Type: String
-    Default: books
+    Default: booksdev
     Description: DynamoDB table name for books
+  FromEmailParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /books/notifications/from-email
+    Description: SSM Parameter for from email address (must be verified in SES)
+  ToEmailParameter:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /books/notifications/to-email
+    Description: SSM Parameter for to email address
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -112,9 +120,14 @@ Resources:
       Architectures:
         - x86_64
       MemorySize: 512
+      Environment:
+        Variables:
+          BOOK_NOTIFICATIONS_TOPIC_ARN: !Ref BookNotificationsTopic
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableNameParameter
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt BookNotificationsTopic.TopicName
       Events:
         CreateBook:
           Type: Api
@@ -257,6 +270,42 @@ Resources:
             Auth:
               Authorizer: BooksAuthorizer
 
+  # SNS Topic for book notifications
+  BookNotificationsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: BookNotifications
+      DisplayName: Book Notifications Topic
+
+  EmailNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: EmailNotificationFunction
+      Handler: email.EmailNotificationHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          FROM_EMAIL: !Ref FromEmailParameter
+          TO_EMAIL: !Ref ToEmailParameter
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: 
+                - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${FromEmailParameter}"
+                - !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${ToEmailParameter}"
+      Events:
+        BookNotification:
+          Type: SNS
+          Properties:
+            Topic: !Ref BookNotificationsTopic
+
   # API Gateway for protected endpoints
   BooksApi:
     Type: AWS::Serverless::Api
@@ -287,3 +336,6 @@ Outputs:
   UserPoolArn:
     Description: "Cognito User Pool ARN"
     Value: !GetAtt BooksUserPool.Arn
+  BookNotificationsTopicArn:
+    Description: "SNS Topic ARN for book notifications"
+    Value: !Ref BookNotificationsTopic

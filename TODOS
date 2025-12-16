@@ -1,8 +1,4 @@
-2.- Crear el registro pero el bien restrictivo con email, cambio de contraseña y espera por el admin
-
 3.- En el create enviar un mensaje a un topic como postmessage
-
-4.- Crear una lamba que este subsctira al topic anterior y que cuando llegue mande una mail de save exitoso con los datos salvados
 
 5.- crear otra lambda que este subscrita al topic y cuando llegue haya una select de todos los elementos lo salve en un
 txt y lo guarde en un s3 backup luego de crear

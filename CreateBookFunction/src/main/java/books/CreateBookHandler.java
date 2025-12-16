@@ -21,6 +21,8 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 @Slf4j
 public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -29,9 +31,12 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
     private final DynamoDbTable<Book> bookTable;
     private final ObjectMapper objectMapper;
     private final String tableName;
+    private final SnsClient snsClient;
+    private final String topicArn;
 
     public CreateBookHandler() {
         this.tableName = System.getenv("TABLE_NAME");
+        this.topicArn = System.getenv("BOOK_NOTIFICATIONS_TOPIC_ARN");
         DynamoDbClient ddbClient = DynamoDbClient.builder().build();
         this.enhancedClient = DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(ddbClient)
@@ -40,6 +45,7 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
         this.objectMapper = new ObjectMapper();
         this.objectMapper.findAndRegisterModules();
         this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.snsClient = SnsClient.builder().build();
     }
 
     @Override
@@ -96,6 +102,9 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
             response.setReadYear(book.getReadYear());
             response.setReadingTimeInDays(book.getReadingTimeInDays());
             
+            // Send notification to SNS topic
+            sendBookNotification(response);
+            
             String jsonResponse = objectMapper.writeValueAsString(response);
             
             return new APIGatewayProxyResponseEvent()
@@ -141,5 +150,22 @@ public class CreateBookHandler implements RequestHandler<APIGatewayProxyRequestE
         }
         
         return 0; // Default for first book
+    }
+    
+    private void sendBookNotification(BookResponse book) {
+        try {
+            String message = objectMapper.writeValueAsString(book);
+            
+            PublishRequest publishRequest = PublishRequest.builder()
+                    .topicArn(topicArn)
+                    .message(message)
+                    .subject("New Book Created: " + book.getTitle())
+                    .build();
+            
+            snsClient.publish(publishRequest);
+            log.info("Notification sent to SNS topic for book: {}", book.getTitle());
+        } catch (Exception e) {
+            log.error("Failed to send SNS notification for book: {}", book.getTitle(), e);
+        }
     }
 }
