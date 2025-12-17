@@ -433,6 +433,36 @@
             border-bottom: none;
         }
         
+        /* Book Card Styles */
+        .book-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 5px auto;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+            max-width: 400px;
+        }
+        
+        .book-field {
+            margin: 6px 0;
+        }
+        
+        .field-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 13px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .field-value {
+            color: var(--text-dark);
+            font-weight: 400;
+            font-size: 14px;
+            display: block;
+        }
+        
         /* Decorative Elements */
         .decorative-line {
             height: 2px;
@@ -903,6 +933,9 @@
                 
                 if (response.ok) {
                     showBooksTable(data, 'All Books');
+                } else if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
                 } else {
                     showResult(`❌ Error: ${data.message || 'Failed to get books'}`, 'error');
                 }
@@ -969,9 +1002,14 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showResult(`✅ Book created successfully!\n${JSON.stringify(data, null, 2)}`, 'success');
+                    showBookCard(data, 'Book Created Successfully');
+                    switchTab('results');
                     document.getElementById('title').value = '';
                     document.getElementById('author').value = '';
+                    document.getElementById('publicationYear').value = '';
+                } else if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
                 } else {
                     showResult(`❌ Error: ${data.message || 'Failed to create book'}`, 'error');
                 }
@@ -997,6 +1035,11 @@
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
+                
+                if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
+                }
                 
                 const data = await response.json();
                 const count = data.count !== undefined ? data.count : (typeof data === 'number' ? data : 0);
@@ -1069,6 +1112,11 @@
                 const response = await fetch(`${BOOKS_API_URL}/books/count/year?year=${encodeURIComponent(year)}`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
+                
+                if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
+                }
                 
                 const data = await response.json();
                 const count = data.count !== undefined ? data.count : (typeof data === 'number' ? data : 0);
@@ -1174,6 +1222,14 @@
             });
         }
         
+        // Handle 401 errors (token expired)
+        function handleUnauthorized() {
+            authToken = '';
+            localStorage.removeItem('authToken');
+            showLoginPage();
+            showFieldError('password', 'Session expired. Please login again.');
+        }
+        
         // Helper functions
         function showResult(message, type = 'success') {
             const resultDiv = document.getElementById('result');
@@ -1229,6 +1285,15 @@
             `;
             
             resultDiv.innerHTML = tableHTML;
+            resultDiv.className = 'result success';
+        }
+        
+        function showBookCard(book, title = 'Book Created') {
+            const resultDiv = document.getElementById('result');
+            
+            const cardHTML = `<h3>✅ ${title}</h3><div class="book-card"><div class="book-field"><span class="field-label">Title:</span><span class="field-value">${book.title || '-'}</span></div><div class="book-field"><span class="field-label">Author:</span><span class="field-value">${book.author || '-'}</span></div><div class="book-field"><span class="field-label">Publication Year:</span><span class="field-value">${book.publicationYear || '-'}</span></div><div class="book-field"><span class="field-label">Language:</span><span class="field-value">${book.language || '-'}</span></div><div class="book-field"><span class="field-label">Format:</span><span class="field-value">${book.format || '-'}</span></div><div class="book-field"><span class="field-label">Read Year:</span><span class="field-value">${book.readYear || '-'}</span></div><div class="book-field"><span class="field-label">Reading Time:</span><span class="field-value">${book.readingTimeInDays || '-'} days</span></div><div class="book-field"><span class="field-label">Finish Date:</span><span class="field-value">${book.finishDate || '-'}</span></div></div>`;
+            
+            resultDiv.innerHTML = cardHTML;
             resultDiv.className = 'result success';
         }
         
@@ -1292,6 +1357,9 @@
                     const searchTitle = searchTerms.length > 0 ? `Search results (${searchTerms.join(', ')})` : 'All Books';
                     showBooksTable(data, searchTitle);
                     switchTab('results');
+                } else if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
                 } else {
                     showResult(`❌ Error: ${data.message || 'Search failed'}`, 'error');
                 }
