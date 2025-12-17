@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Biblioteca Digital - Books Collection</title>
+    <title>📚 Books Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -433,6 +433,15 @@
             border-bottom: none;
         }
         
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .sortable:hover {
+            background: rgba(139, 69, 19, 0.1);
+        }
+        
         /* Book Card Styles */
         .book-card {
             background: var(--card-bg);
@@ -461,6 +470,56 @@
             font-weight: 400;
             font-size: 14px;
             display: block;
+        }
+        
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            gap: 5px;
+        }
+        
+        .pagination-btn {
+            padding: 8px 12px;
+            margin: 0;
+            background: var(--card-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+        }
+        
+        .pagination-info {
+            color: var(--text-light);
+            font-size: 13px;
         }
         
         /* Decorative Elements */
@@ -1237,6 +1296,11 @@
             resultDiv.className = `result ${type}`;
         }
         
+        let currentBooks = [];
+        let currentPage = 1;
+        const booksPerPage = 10;
+        let currentSort = { field: null, direction: 'asc' };
+        
         function showBooksTable(books, title = 'Books') {
             const resultDiv = document.getElementById('result');
             
@@ -1246,25 +1310,40 @@
                 return;
             }
             
+            currentBooks = books;
+            currentPage = 1;
+            renderBooksPage(title);
+        }
+        
+        function renderBooksPage(title) {
+            const resultDiv = document.getElementById('result');
+            const totalPages = Math.ceil(currentBooks.length / booksPerPage);
+            const startIndex = (currentPage - 1) * booksPerPage;
+            const endIndex = startIndex + booksPerPage;
+            const booksToShow = currentBooks.slice(startIndex, endIndex);
+            
             let tableHTML = `
-                <h3>📚 ${title} (${books.length})</h3>
+                <div class="table-header">
+                    <h3>📚 ${title} (${currentBooks.length})</h3>
+                    <div class="pagination-info">Page ${currentPage} of ${totalPages} - Showing ${startIndex + 1}-${Math.min(endIndex, currentBooks.length)} of ${currentBooks.length} books</div>
+                </div>
                 <table class="books-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>Year</th>
-                            <th>Language</th>
-                            <th>Format</th>
-                            <th>Read Year</th>
-                            <th>Days</th>
+                            <th onclick="sortBooks('id')" class="sortable">ID ${getSortIcon('id')}</th>
+                            <th onclick="sortBooks('title')" class="sortable">Title ${getSortIcon('title')}</th>
+                            <th onclick="sortBooks('author')" class="sortable">Author ${getSortIcon('author')}</th>
+                            <th onclick="sortBooks('publicationYear')" class="sortable">Year ${getSortIcon('publicationYear')}</th>
+                            <th onclick="sortBooks('language')" class="sortable">Language ${getSortIcon('language')}</th>
+                            <th onclick="sortBooks('format')" class="sortable">Format ${getSortIcon('format')}</th>
+                            <th onclick="sortBooks('readYear')" class="sortable">Read Year ${getSortIcon('readYear')}</th>
+                            <th onclick="sortBooks('readingTimeInDays')" class="sortable">Days ${getSortIcon('readingTimeInDays')}</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
             
-            books.forEach(book => {
+            booksToShow.forEach(book => {
                 tableHTML += `
                     <tr>
                         <td>${book.id || '-'}</td>
@@ -1284,8 +1363,75 @@
                 </table>
             `;
             
+            // Add pagination controls
+            if (totalPages > 1) {
+                tableHTML += `<div class="pagination">`;
+                
+                // Previous button
+                if (currentPage > 1) {
+                    tableHTML += `<button onclick="changePage(${currentPage - 1})" class="pagination-btn">« Previous</button>`;
+                }
+                
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        tableHTML += `<button class="pagination-btn active">${i}</button>`;
+                    } else {
+                        tableHTML += `<button onclick="changePage(${i})" class="pagination-btn">${i}</button>`;
+                    }
+                }
+                
+                // Next button
+                if (currentPage < totalPages) {
+                    tableHTML += `<button onclick="changePage(${currentPage + 1})" class="pagination-btn">Next »</button>`;
+                }
+                
+                tableHTML += `</div>`;
+            }
+            
             resultDiv.innerHTML = tableHTML;
             resultDiv.className = 'result success';
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderBooksPage('Books');
+        }
+        
+        function getSortIcon(field) {
+            if (currentSort.field !== field) return '↕';
+            return currentSort.direction === 'asc' ? '↑' : '↓';
+        }
+        
+        function sortBooks(field) {
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'asc';
+            }
+            
+            currentBooks.sort((a, b) => {
+                let aVal = a[field];
+                let bVal = b[field];
+                
+                // Handle null/undefined
+                if (aVal == null) return 1;
+                if (bVal == null) return -1;
+                
+                // String comparison
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            currentPage = 1;
+            renderBooksPage('Books');
         }
         
         function showBookCard(book, title = 'Book Created') {
