@@ -1,8 +1,3 @@
-3.- En el create enviar un mensaje a un topic como postmessage
-
-5.- crear otra lambda que este subscrita al topic y cuando llegue haya una select de todos los elementos lo salve en un
-txt y lo guarde en un s3 backup luego de crear
-
 6.- crear una lambda que escuche por dynamo cada vez que hay un nuevo elemento calcular el numero de dias leyendo
 con respecto al anterior (luego quitar este calculo de la funcion principal)
 
@@ -12,3 +7,7 @@ creado
 8.- Entender el tema del ClockWatch para los logs
 
 9.- Entender el tema de Xray para observability
+
+10.- crear un S3 Static Website para llamar a los endpoints
+
+11.- para el login que tenga las dos opciones o con un usuario ya existente en cognito o con un usario de gmail (federate)

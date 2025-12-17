@@ -18,6 +18,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /books/notifications/to-email
     Description: SSM Parameter for to email address
+  BackupBucketNameParameter:
+    Type: String
+    Default: books-backup-bucket-unique
+    Description: S3 bucket name for backups
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -86,6 +90,7 @@ Resources:
         Login:
           Type: Api
           Properties:
+            RestApiId: !Ref LoginApi
             Path: /login
             Method: post
 
@@ -110,6 +115,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        GetAllBooksOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
@@ -181,6 +194,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        GetBooksCountOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/count
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   SearchBooksByTitleFunction:
     Type: AWS::Serverless::Function
@@ -203,6 +224,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        SearchBooksByTitleOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/title
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   SearchBooksByAuthorFunction:
     Type: AWS::Serverless::Function
@@ -225,6 +254,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        SearchBooksByAuthorOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/author
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   GetBooksCountByYearFunction:
     Type: AWS::Serverless::Function
@@ -247,6 +284,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        GetBooksCountByYearOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/count/year
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   SearchBooksByReadYearFunction:
     Type: AWS::Serverless::Function
@@ -269,6 +314,14 @@ Resources:
             Method: get
             Auth:
               Authorizer: BooksAuthorizer
+        SearchBooksByReadYearOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /books/search/year
+            Method: options
+            Auth:
+              Authorizer: NONE
 
   # SNS Topic for book notifications
   BookNotificationsTopic:
@@ -276,6 +329,42 @@ Resources:
     Properties:
       TopicName: BookNotifications
       DisplayName: Book Notifications Topic
+
+  # S3 Bucket for backups
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${BackupBucketNameParameter}-${AWS::AccountId}"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  BackupBooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: BackupBooksFunction
+      Handler: books.BackupBooksHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          BACKUP_BUCKET_NAME: !Sub "${BackupBucketNameParameter}-${AWS::AccountId}"
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+        - S3WritePolicy:
+            BucketName: !Sub "${BackupBucketNameParameter}-${AWS::AccountId}"
+      Events:
+        BookNotification:
+          Type: SNS
+          Properties:
+            Topic: !Ref BookNotificationsTopic
 
   EmailNotificationFunction:
     Type: AWS::Serverless::Function
@@ -305,6 +394,46 @@ Resources:
           Type: SNS
           Properties:
             Topic: !Ref BookNotificationsTopic
+
+  SearchBooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SearchBooksFunction
+      Handler: search.SearchBooksHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+      Events:
+        SearchBooks:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /search
+            Method: get
+            Auth:
+              Authorizer: BooksAuthorizer
+        SearchBooksOptions:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BooksApi
+            Path: /search
+            Method: options
+            Auth:
+              Authorizer: NONE
+
+  # API Gateway for login (with CORS)
+  LoginApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
 
   # API Gateway for protected endpoints
   BooksApi:

@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Biblioteca Digital - Books Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --accent-color: #CD853F;
+            --text-dark: #2F1B14;
+            --text-light: #8B7355;
+            --background: #FFF8DC;
+            --card-bg: #FFFEF7;
+            --border-color: #DEB887;
+            --success-color: #228B22;
+            --error-color: #B22222;
+            --shadow: 0 8px 32px rgba(139, 69, 19, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #F5E6D3 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(210, 105, 30, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+        
+        /* Login Page Styles */
+        .login-container {
+            max-width: 450px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .login-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.1);
+        }
+        
+        .login-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+        
+        .book-icon {
+            font-size: 4rem;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid var(--border-color);
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+        
+        .dashboard-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #B22222, #8B0000);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #8B0000, #660000);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(178, 34, 34, 0.4);
+        }
+        
+        /* Button Styles */
+        button {
+            padding: 14px 28px;
+            margin: 8px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, var(--success-color), #32CD32);
+            padding: 18px 36px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(34, 139, 34, 0.3);
+        }
+        
+        .primary-btn:hover {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4);
+        }
+        
+        /* Grid Layouts */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        /* Form Styles */
+        input, select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            width: 100%;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(139, 69, 19, 0.1);
+        }
+        
+        .form-group {
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+        
+        .form-vertical {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .form-vertical button {
+            display: block;
+            margin: 30px auto 0;
+        }
+        
+        .field-error {
+            color: var(--error-color);
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        /* Section Styles */
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #FFFBF0 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        
+        /* Result Styles */
+        .result {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            position: relative;
+        }
+        
+        .result::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .result::-webkit-scrollbar-track {
+            background: var(--background);
+            border-radius: 4px;
+        }
+        
+        .result::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #FFE4E1, #FFF0F0);
+            color: var(--error-color);
+            border-color: #FFB6C1;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #FFFBF0 100%);
+            color: var(--text-dark);
+            border-color: var(--border-color);
+        }
+        
+        /* Tab System */
+        .tabs-container {
+            margin: 30px 0;
+        }
+        
+        .tabs-nav {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 30px;
+            position: relative;
+            justify-content: flex-start;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            background: var(--background);
+            border: 2px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 0 2px 0 0;
+            min-width: 160px;
+        }
+        
+        .tab-button.active {
+            color: var(--primary-color);
+            background: var(--card-bg);
+            border-color: var(--primary-color);
+            transform: translateY(2px);
+            z-index: 1;
+        }
+        
+        .tab-button:hover:not(.active) {
+            color: var(--primary-color);
+            background: rgba(139, 69, 19, 0.05);
+            transform: translateY(1px);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeInTab 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Table Styles */
+        .books-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+        }
+        
+        .books-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .books-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        .books-table tr:hover {
+            background: rgba(139, 69, 19, 0.05);
+        }
+        
+        .books-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Decorative Elements */
+        .decorative-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            margin: 30px 0;
+        }
+        
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(47, 27, 20, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            font-size: 16px;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            margin: 20px 0;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(139, 69, 19, 0.2);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .modal-btn-secondary {
+            background: #f8f9fa;
+            color: var(--text-dark);
+            border: 2px solid var(--border-color);
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(47, 27, 20, 0.8);
+            backdrop-filter: blur(3px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .page { padding: 25px; }
+            .button-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 20px; text-align: center; }
+            .login-title { font-size: 2.5rem; }
+            .dashboard-title { font-size: 2rem; }
+            .modal { padding: 30px; }
+            .modal-buttons { flex-direction: column; }
+        }
+        
+        @media (max-width: 480px) {
+            .login-title { font-size: 2rem; }
+            .dashboard-title { font-size: 1.5rem; }
+            button { padding: 12px 20px; font-size: 13px; }
+            .modal { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Page -->
+        <div id="loginPage" class="page">
+            <div class="login-container">
+                <div class="book-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h1 class="login-title">Digital Library</h1>
+                <p class="login-subtitle">"Books are a uniquely portable magic" - Stephen King</p>
+                
+                <div class="decorative-line"></div>
+                
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" value="piter1234@gmail.com">
+                    <div class="field-error" id="email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <div class="field-error" id="password-error"></div>
+                </div>
+                <button onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Access Library
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page" style="display: none;">
+            <div class="header">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-university"></i>
+                    My Personal Library
+                </h1>
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+
+            <!-- Tab System -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-button active" onclick="switchTab('search')">
+                        <i class="fas fa-search"></i> Search Books
+                    </button>
+                    <button class="tab-button" onclick="switchTab('add')">
+                        <i class="fas fa-plus-circle"></i> Add New Book
+                    </button>
+                    <button class="tab-button" onclick="switchTab('stats')">
+                        <i class="fas fa-chart-bar"></i> Statistics
+                    </button>
+                    <button class="tab-button" onclick="switchTab('results')">
+                        <i class="fas fa-list-alt"></i> Results
+                    </button>
+                </div>
+                
+                <!-- Search Tab Content -->
+                <div id="searchTab" class="tab-content active">
+                    <div class="form-vertical">
+                        <div class="form-group">
+                            <label for="searchTitle"><i class="fas fa-book"></i> Title</label>
+                            <input type="text" id="searchTitle" placeholder="Search by title (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchAuthor"><i class="fas fa-user-edit"></i> Author</label>
+                            <input type="text" id="searchAuthor" placeholder="Search by author (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchYear"><i class="fas fa-calendar"></i> Publication Year</label>
+                            <input type="number" id="searchYear" placeholder="Publication year (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchReadYear"><i class="fas fa-clock"></i> Read Year</label>
+                            <input type="number" id="searchReadYear" placeholder="Year you read it (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchLanguage"><i class="fas fa-globe"></i> Language</label>
+                            <input type="text" id="searchLanguage" placeholder="Language (optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchFormat"><i class="fas fa-book"></i> Format</label>
+                            <select id="searchFormat">
+                                <option value="">All formats</option>
+                                <option value="EBOOK">📻 Ebook</option>
+                                <option value="PAPERBACK">📖 Paperback</option>
+                            </select>
+                        </div>
+                        <button onclick="searchBooks()">
+                            <i class="fas fa-search"></i> Search Books
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Statistics Tab Content -->
+                <div id="statsTab" class="tab-content">
+                    <div class="button-grid">
+                        <button onclick="getBooksCount()">
+                            <i class="fas fa-calculator"></i> Count Books
+                        </button>
+                        <button onclick="getBooksCountByYear()">
+                            <i class="fas fa-calendar-alt"></i> Books by Year
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results Tab Content -->
+                <div id="resultsTab" class="tab-content">
+                    <div id="result" class="result">Your query results will appear here...</div>
+                </div>
+                
+                <!-- Add Book Tab Content -->
+                <div id="addTab" class="tab-content">
+                    <div class="form-vertical">
+                        <div class="form-group">
+                            <label for="title"><i class="fas fa-book"></i> Title</label>
+                            <input type="text" id="title" placeholder="Book title">
+                            <div class="field-error" id="title-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="author"><i class="fas fa-user-edit"></i> Author</label>
+                            <input type="text" id="author" placeholder="Author name">
+                            <div class="field-error" id="author-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="publicationYear"><i class="fas fa-calendar"></i> Publication Year</label>
+                            <input type="number" id="publicationYear" placeholder="Year">
+                            <div class="field-error" id="publicationYear-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="language"><i class="fas fa-globe"></i> Language</label>
+                            <input type="text" id="language" placeholder="Language" value="English">
+                        </div>
+                        <div class="form-group">
+                            <label for="format"><i class="fas fa-book"></i> Format</label>
+                            <select id="format">
+                                <option value="EBOOK">💻 Ebook</option>
+                                <option value="PAPERBACK">📖 Paperback</option>
+                            </select>
+                        </div>
+                        <button onclick="createBook()">
+                            <i class="fas fa-plus"></i> Add to Library
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        
+        <!-- Custom Modal -->
+        <div id="customModal" class="modal-overlay">
+            <div class="modal">
+                <h3 id="modalTitle" class="modal-title"></h3>
+                <input type="text" id="modalInput" class="modal-input" placeholder="Enter value...">
+                <div class="modal-buttons">
+                    <button id="modalCancel" class="modal-btn modal-btn-secondary">Cancel</button>
+                    <button id="modalConfirm" class="modal-btn modal-btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Gateway URLs
+        const LOGIN_API_URL = 'https://owv2mgn23e.execute-api.eu-central-1.amazonaws.com/Prod';
+        const BOOKS_API_URL = 'https://rn7cj8wbua.execute-api.eu-central-1.amazonaws.com/Prod';
+        
+        // Add CORS headers to all requests
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        };
+        
+        let authToken = localStorage.getItem('authToken') || '';
+        
+        // Page navigation functions
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('dashboardPage').style.display = 'none';
+        }
+        
+        function showDashboardPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboardPage').style.display = 'block';
+        }
+        
+        // Login function
+        async function login() {
+            // Clear previous errors
+            clearFieldErrors();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            let hasErrors = false;
+            
+            if (!email) {
+                showFieldError('email', 'Email is required');
+                hasErrors = true;
+            }
+            
+            if (!password) {
+                showFieldError('password', 'Password is required');
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            showLoading('Logging in...');
+            
+            try {
+                const response = await fetch(`${LOGIN_API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.idToken) {
+                    authToken = data.idToken;
+                    localStorage.setItem('authToken', authToken);
+                    
+                    // Clear form and redirect to dashboard
+                    document.getElementById('password').value = '';
+                    showDashboardPage();
+                    showResult('Welcome to your Digital Library!', 'success');
+                } else {
+                    showFieldError('password', 'Invalid credentials');
+                }
+            } catch (error) {
+                showFieldError('password', 'Login error occurred');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            authToken = '';
+            localStorage.removeItem('authToken');
+            
+            // Clear forms
+            document.getElementById('title').value = '';
+            document.getElementById('author').value = '';
+            document.getElementById('publicationYear').value = '';
+            document.getElementById('language').value = 'English';
+            document.getElementById('format').value = 'PAPERBACK';
+            
+            // Show login page
+            showLoginPage();
+
+        }
+        
+        // Get all books
+        async function getAllBooks() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            showLoading('Loading books...');
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showBooksTable(data, 'All Books');
+                } else {
+                    showResult(`❌ Error: ${data.message || 'Failed to get books'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Create book
+        async function createBook() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            // Clear previous errors
+            clearFieldErrors();
+            
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const publicationYear = document.getElementById('publicationYear').value.trim();
+            
+            let hasErrors = false;
+            
+            if (!title) {
+                showFieldError('title', 'Title is required');
+                hasErrors = true;
+            }
+            
+            if (!author) {
+                showFieldError('author', 'Author is required');
+                hasErrors = true;
+            }
+            
+            if (!publicationYear) {
+                showFieldError('publicationYear', 'Publication year is required');
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            const bookData = {
+                title: title,
+                author: author,
+                publicationYear: parseInt(publicationYear),
+                language: document.getElementById('language').value,
+                format: document.getElementById('format').value
+            };
+            
+            showLoading('Creating book...');
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(bookData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Book created successfully!\n${JSON.stringify(data, null, 2)}`, 'success');
+                    document.getElementById('title').value = '';
+                    document.getElementById('author').value = '';
+                } else {
+                    showResult(`❌ Error: ${data.message || 'Failed to create book'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Get books count
+        async function getBooksCount() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            showLoading('Counting books...');
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books/count`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                const count = data.count !== undefined ? data.count : (typeof data === 'number' ? data : 0);
+                showResult(`📊 Total books: ${count}`, 'success');
+                switchTab('results');
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Search by title
+        async function searchByTitle() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            const title = await showCustomModal('Search by Title', 'Enter book title to search...', 'fas fa-book');
+            if (!title) return;
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books/search/title?title=${encodeURIComponent(title)}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                showBooksTable(data, `Search results for "${title}"`);
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Search by author
+        async function searchByAuthor() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            const author = await showCustomModal('Search by Author', 'Enter author name to search...', 'fas fa-user-edit');
+            if (!author) return;
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books/search/author?author=${encodeURIComponent(author)}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                showBooksTable(data, `Search results for "${author}"`);
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Get books count by year
+        async function getBooksCountByYear() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            const year = await showCustomModal('Books Count by Year', 'Enter year (e.g., 2023)...', 'fas fa-calendar-alt');
+            if (!year) return;
+            
+            showLoading('Counting books by year...');
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books/count/year?year=${encodeURIComponent(year)}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                const count = data.count !== undefined ? data.count : (typeof data === 'number' ? data : 0);
+                showResult(`📊 Books count for year ${year}: ${count}`, 'success');
+                switchTab('results');
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Search by read year
+        async function searchByReadYear() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            const year = await showCustomModal('Search by Read Year', 'Enter year you read the books (e.g., 2023)...', 'fas fa-clock');
+            if (!year) return;
+            
+            try {
+                const response = await fetch(`${BOOKS_API_URL}/books/search/year?year=${encodeURIComponent(year)}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                showBooksTable(data, `Books read in ${year}`);
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Custom Modal Functions
+        function showCustomModal(title, placeholder, icon = 'fas fa-question-circle') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalInput = document.getElementById('modalInput');
+                const modalConfirm = document.getElementById('modalConfirm');
+                const modalCancel = document.getElementById('modalCancel');
+                
+                modalTitle.innerHTML = `<i class="${icon}"></i> ${title}`;
+                modalInput.placeholder = placeholder;
+                modalInput.value = '';
+                modal.style.display = 'flex';
+                modalInput.focus();
+                
+                const handleConfirm = () => {
+                    const value = modalInput.value.trim();
+                    modal.style.display = 'none';
+                    cleanup();
+                    resolve(value || null);
+                };
+                
+                const handleCancel = () => {
+                    modal.style.display = 'none';
+                    cleanup();
+                    resolve(null);
+                };
+                
+                const handleKeyPress = (e) => {
+                    if (e.key === 'Enter') handleConfirm();
+                    if (e.key === 'Escape') handleCancel();
+                };
+                
+                const cleanup = () => {
+                    modalConfirm.removeEventListener('click', handleConfirm);
+                    modalCancel.removeEventListener('click', handleCancel);
+                    modalInput.removeEventListener('keypress', handleKeyPress);
+                    document.removeEventListener('keydown', handleKeyPress);
+                };
+                
+                modalConfirm.addEventListener('click', handleConfirm);
+                modalCancel.addEventListener('click', handleCancel);
+                modalInput.addEventListener('keypress', handleKeyPress);
+                document.addEventListener('keydown', handleKeyPress);
+            });
+        }
+        
+        // Loading functions
+        function showLoading(message = 'Loading...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        // Field validation functions
+        function showFieldError(fieldId, message) {
+            const errorDiv = document.getElementById(fieldId + '-error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(error => {
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+        }
+        
+        // Helper functions
+        function showResult(message, type = 'success') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+        }
+        
+        function showBooksTable(books, title = 'Books') {
+            const resultDiv = document.getElementById('result');
+            
+            if (!books || books.length === 0) {
+                resultDiv.innerHTML = `📚 ${title}: No books found`;
+                resultDiv.className = 'result success';
+                return;
+            }
+            
+            let tableHTML = `
+                <h3>📚 ${title} (${books.length})</h3>
+                <table class="books-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                            <th>Language</th>
+                            <th>Format</th>
+                            <th>Read Year</th>
+                            <th>Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            books.forEach(book => {
+                tableHTML += `
+                    <tr>
+                        <td>${book.id || '-'}</td>
+                        <td>${book.title || '-'}</td>
+                        <td>${book.author || '-'}</td>
+                        <td>${book.publicationYear || '-'}</td>
+                        <td>${book.language || '-'}</td>
+                        <td>${book.format || '-'}</td>
+                        <td>${book.readYear || '-'}</td>
+                        <td>${book.readingTimeInDays || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            resultDiv.innerHTML = tableHTML;
+            resultDiv.className = 'result success';
+        }
+        
+
+        
+        // Initialize app
+        function initializeApp() {
+            if (authToken) {
+                showDashboardPage();
+                showResult('✅ Welcome back to your library!', 'success');
+            } else {
+                showLoginPage();
+
+            }
+        }
+        
+        // New unified search function
+        async function searchBooks() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+            
+            const params = new URLSearchParams();
+            
+            const title = document.getElementById('searchTitle').value.trim();
+            const author = document.getElementById('searchAuthor').value.trim();
+            const year = document.getElementById('searchYear').value.trim();
+            const readYear = document.getElementById('searchReadYear').value.trim();
+            const language = document.getElementById('searchLanguage').value.trim();
+            const format = document.getElementById('searchFormat').value.trim();
+            
+            if (title) params.append('title', title);
+            if (author) params.append('author', author);
+            if (year) params.append('year', year);
+            if (readYear) params.append('readYear', readYear);
+            if (language) params.append('language', language);
+            if (format) params.append('format', format);
+            
+            const queryString = params.toString();
+            const url = `${BOOKS_API_URL}/search${queryString ? '?' + queryString : ''}`;
+            
+            showLoading('Searching books...');
+            
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const searchTerms = [];
+                    if (title) searchTerms.push(`title: "${title}"`);
+                    if (author) searchTerms.push(`author: "${author}"`);
+                    if (year) searchTerms.push(`year: ${year}`);
+                    if (readYear) searchTerms.push(`read year: ${readYear}`);
+                    if (language) searchTerms.push(`language: "${language}"`);
+                    if (format) searchTerms.push(`format: ${format}`);
+                    
+                    const searchTitle = searchTerms.length > 0 ? `Search results (${searchTerms.join(', ')})` : 'All Books';
+                    showBooksTable(data, searchTitle);
+                    switchTab('results');
+                } else {
+                    showResult(`❌ Error: ${data.message || 'Search failed'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Tab switching function
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and button
+            if (tabName === 'search') {
+                document.querySelector('.tab-button:nth-child(1)').classList.add('active');
+                document.getElementById('searchTab').classList.add('active');
+            } else if (tabName === 'add') {
+                document.querySelector('.tab-button:nth-child(2)').classList.add('active');
+                document.getElementById('addTab').classList.add('active');
+            } else if (tabName === 'stats') {
+                document.querySelector('.tab-button:nth-child(3)').classList.add('active');
+                document.getElementById('statsTab').classList.add('active');
+            } else if (tabName === 'results') {
+                document.querySelector('.tab-button:nth-child(4)').classList.add('active');
+                document.getElementById('resultsTab').classList.add('active');
+            }
+        }
+        
+        // Initialize on page load
+        initializeApp();
+    </script>
+</body>
+</html>

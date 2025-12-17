@@ -37,6 +37,16 @@ public class GetBooksCountHandler implements RequestHandler<APIGatewayProxyReque
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        
+        // Handle OPTIONS request for CORS preflight
+        if ("OPTIONS".equals(input.getHttpMethod())) {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withHeaders(headers)
+                    .withBody("");
+        }
 
         try {
             log.info("Counting books in table: {}", tableName);
