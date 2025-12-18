@@ -425,6 +425,30 @@ Resources:
             Auth:
               Authorizer: NONE
 
+  ScheduledBackupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ScheduledBackupFunction
+      Handler: books.ScheduledBackupHandler::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Environment:
+        Variables:
+          BACKUP_BUCKET_NAME: !Sub "${BackupBucketNameParameter}-${AWS::AccountId}"
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TableNameParameter
+        - S3WritePolicy:
+            BucketName: !Sub "${BackupBucketNameParameter}-${AWS::AccountId}"
+      Events:
+        ScheduledBackup:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 0 1 * ? *)
+            Description: "Scheduled backup on the 1st day of every month at midnight"
+
   # API Gateway for login (with CORS)
   LoginApi:
     Type: AWS::Serverless::Api

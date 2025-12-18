@@ -1,6 +1,3 @@
-7.- Crear una landa schedulada que haga un backup completo (txt) de la base de datos cada mes y envie una mail de backup
-creado
-
 9.- Entender el tema de Xray para observability
 
 11.- para el login que tenga las dos opciones o con un usuario ya existente en cognito o con un usario de gmail (federate)

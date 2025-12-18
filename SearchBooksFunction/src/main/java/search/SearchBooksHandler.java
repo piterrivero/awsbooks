@@ -15,7 +15,7 @@ public class SearchBooksHandler implements RequestHandler<APIGatewayProxyRequest
 
     private final DynamoDbClient dynamoDbClient = DynamoDbClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String TABLE_NAME = "booksdev";
+    private final String TABLE_NAME = System.getenv("TABLE_NAME");
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {

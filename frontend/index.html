@@ -1372,8 +1372,17 @@
                     tableHTML += `<button onclick="changePage(${currentPage - 1})" class="pagination-btn">« Previous</button>`;
                 }
                 
-                // Page numbers
-                for (let i = 1; i <= totalPages; i++) {
+                // Calculate page range (show 5 pages max)
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                // Adjust start if we're near the end
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+                
+                // Page numbers (max 5)
+                for (let i = startPage; i <= endPage; i++) {
                     if (i === currentPage) {
                         tableHTML += `<button class="pagination-btn active">${i}</button>`;
                     } else {
