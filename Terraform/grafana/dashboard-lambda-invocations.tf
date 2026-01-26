@@ -40,7 +40,7 @@ resource "grafana_dashboard" "lambda_invocations" {
             }
             period      = "300"
             region      = "eu-central-1"
-            matchExact  = false
+            matchExact  = true
           }
         ]
         fieldConfig = {
@@ -50,7 +50,7 @@ resource "grafana_dashboard" "lambda_invocations" {
             }
             custom = {
               lineWidth       = 2
-              fillOpacity     = 10
+              fillOpacity     = 0
               spanNulls       = false
               showPoints      = "never"
               pointSize       = 5
@@ -69,7 +69,134 @@ resource "grafana_dashboard" "lambda_invocations" {
           }
           legend = {
             displayMode = "table"
-            placement   = "right"
+            placement   = "bottom"
+            calcs       = ["lastNotNull", "sum"]
+          }
+        }
+      },
+      {
+        id    = 2
+        title = "API Gateway - Successful Requests (2xx)"
+        type  = "timeseries"
+        gridPos = {
+          h = 10
+          w = 12
+          x = 0
+          y = 12
+        }
+        datasource = {
+          type = "cloudwatch"
+          uid  = grafana_data_source.cloudwatch.uid
+        }
+        targets = [
+          {
+            refId       = "A"
+            datasource = {
+              type = "cloudwatch"
+              uid  = grafana_data_source.cloudwatch.uid
+            }
+            namespace   = "AWS/ApiGateway"
+            metricName  = "Count"
+            statistic   = "Sum"
+            dimensions  = {
+              ApiName = "*"
+            }
+            period      = "300"
+            region      = "eu-central-1"
+            matchExact  = true
+          }
+        ]
+        fieldConfig = {
+          defaults = {
+            color = {
+              mode = "fixed"
+              fixedColor = "green"
+            }
+            custom = {
+              lineWidth   = 2
+              fillOpacity = 0
+            }
+            unit = "short"
+          }
+        }
+        options = {
+          tooltip = {
+            mode = "multi"
+          }
+          legend = {
+            displayMode = "table"
+            placement   = "bottom"
+            calcs       = ["lastNotNull", "sum"]
+          }
+        }
+      },
+      {
+        id    = 3
+        title = "API Gateway - Failed Requests by Status Code"
+        type  = "timeseries"
+        gridPos = {
+          h = 10
+          w = 12
+          x = 12
+          y = 12
+        }
+        datasource = {
+          type = "cloudwatch"
+          uid  = grafana_data_source.cloudwatch.uid
+        }
+        targets = [
+          {
+            refId       = "A"
+            datasource = {
+              type = "cloudwatch"
+              uid  = grafana_data_source.cloudwatch.uid
+            }
+            namespace   = "AWS/ApiGateway"
+            metricName  = "4XXError"
+            statistic   = "Sum"
+            dimensions  = {
+              ApiName = "*"
+            }
+            period      = "300"
+            region      = "eu-central-1"
+            matchExact  = true
+          },
+          {
+            refId       = "B"
+            datasource = {
+              type = "cloudwatch"
+              uid  = grafana_data_source.cloudwatch.uid
+            }
+            namespace   = "AWS/ApiGateway"
+            metricName  = "5XXError"
+            statistic   = "Sum"
+            dimensions  = {
+              ApiName = "*"
+            }
+            period      = "300"
+            region      = "eu-central-1"
+            matchExact  = true
+          }
+        ]
+        fieldConfig = {
+          defaults = {
+            color = {
+              mode = "palette-classic"
+            }
+            custom = {
+              lineWidth   = 2
+              fillOpacity = 0
+            }
+            unit = "short"
+          }
+        }
+        options = {
+          tooltip = {
+            mode = "multi"
+          }
+          legend = {
+            displayMode = "table"
+            placement   = "bottom"
             calcs       = ["lastNotNull", "sum"]
           }
         }
