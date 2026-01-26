@@ -1,0 +1,79 @@
+resource "grafana_dashboard" "lambda_invocations" {
+  config_json = jsonencode({
+    title    = "Lambda Invocations"
+    uid      = "lambda-invocations"
+    tags     = ["lambda", "aws"]
+    timezone = "browser"
+    time = {
+      from = "now-6h"
+      to   = "now"
+    }
+    refresh = "30s"
+
+    panels = [
+      {
+        id    = 1
+        title = "Total Lambda Invocations"
+        type  = "timeseries"
+        gridPos = {
+          h = 12
+          w = 24
+          x = 0
+          y = 0
+        }
+        datasource = {
+          type = "cloudwatch"
+          uid  = grafana_data_source.cloudwatch.uid
+        }
+        targets = [
+          {
+            refId       = "A"
+            datasource = {
+              type = "cloudwatch"
+              uid  = grafana_data_source.cloudwatch.uid
+            }
+            namespace   = "AWS/Lambda"
+            metricName  = "Invocations"
+            statistic   = "Sum"
+            dimensions  = {
+              FunctionName = "*"
+            }
+            period      = "300"
+            region      = "eu-central-1"
+            matchExact  = false
+          }
+        ]
+        fieldConfig = {
+          defaults = {
+            color = {
+              mode = "palette-classic"
+            }
+            custom = {
+              lineWidth       = 2
+              fillOpacity     = 10
+              spanNulls       = false
+              showPoints      = "never"
+              pointSize       = 5
+              stacking = {
+                mode  = "none"
+                group = "A"
+              }
+            }
+            unit = "short"
+          }
+        }
+        options = {
+          tooltip = {
+            mode = "multi"
+            sort = "desc"
+          }
+          legend = {
+            displayMode = "table"
+            placement   = "right"
+            calcs       = ["lastNotNull", "sum"]
+          }
+        }
+      }
+    ]
+  })
+}

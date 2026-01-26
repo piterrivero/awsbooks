@@ -1,0 +1,6 @@
+resource "grafana_dashboard" "mi_dashboard_existente" {
+  config_json = jsonencode({
+    # Pega aquí el JSON completo de tu dashboard existente
+    # que copiaste desde Grafana UI → Settings → JSON Model
+  })
+}
